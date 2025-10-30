@@ -1,0 +1,22 @@
+# docker-compose.yml
+# Atlas ROCm Deployment (future-proof, no version pin)
+
+services:
+  atlas:
+    build:
+      context: .
+      dockerfile: Dockerfile.rocm
+    container_name: atlas_rocm
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../Atlas:/app/Atlas:rw
+      - ./logs:/app/logs:rw
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=10.3.0
+      - HIP_VISIBLE_DEVICES=0
+      - PYTHONUNBUFFERED=1
