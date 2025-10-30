@@ -1,0 +1,35 @@
+# Atlas Dockerfile (ROCm‑enabled) - # rename when active if need be
+
+```dockerfile
+# Base image: ROCm runtime with Ubuntu
+FROM rocm/dev-ubuntu-22.04:5.7-complete
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git \
+        python3 \
+        python3-pip \
+        python3-venv \
+        && rm -rf /var/lib/apt/lists/*
+
+# Copy Atlas into container (as subfolder, never repo root rename)
+COPY ./Atlas /app/Atlas
+
+# Install Python dependencies (adjust requirements as needed)
+RUN pip3 install --upgrade pip && \
+    pip3 install -r /app/Atlas/requirements.txt
+
+# Environment variables for ROCm + LM Studio
+ENV HSA_OVERRIDE_GFX_VERSION=10.3.0
+ENV HIP_VISIBLE_DEVICES=0
+ENV PYTHONUNBUFFERED=1
+
+# Expose port if LM Studio or Atlas agent needs remote access
+EXPOSE 8000
+
+# Default command: run Atlas entrypoint
+CMD ["python3", "/app/Atlas/main.py"]
